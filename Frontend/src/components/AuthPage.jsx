@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import API from '../services/api';
 import { useUser } from '../context/UserContext';
-import { Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { gsap } from 'gsap';
 
 const AuthPage = () => {
@@ -12,6 +12,8 @@ const AuthPage = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const { login } = useUser();
     const [authLoading, setAuthLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
 
     // Form State
     const [formData, setFormData] = useState({
@@ -239,9 +241,33 @@ const AuthPage = () => {
                                 <Mail size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
                             </div>
                             <div className="form-item-stagger" style={{ width: '100%', position: 'relative' }}>
-                                <input type="password" name="password" placeholder="Password" style={inputStyle} required onChange={handleChange} />
+                                <input type={showPassword ? "text" : "password"} name="password" placeholder="Password" style={passwordInputStyle} required onChange={handleChange} />
                                 <Lock size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '16px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        padding: 0,
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        color: 'var(--text-secondary)',
+                                        opacity: 0.6,
+                                        transition: 'opacity 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
+
 
                             <button type="submit" className="btn-primary form-item-stagger" style={{ width: '100%', padding: '14px', marginTop: '12px' }}>
                                 {isSignUp ? 'Create Premium Account' : 'Sign In Now'}
@@ -329,9 +355,33 @@ const AuthPage = () => {
                                     <Mail size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
                                 </div>
                                 <div className="form-item-stagger" style={{ width: '100%', position: 'relative' }}>
-                                    <input type="password" name="password" placeholder="Password" style={inputStyle} required onChange={handleChange} />
+                                    <input type={showPassword ? "text" : "password"} name="password" placeholder="Password" style={passwordInputStyle} required onChange={handleChange} />
                                     <Lock size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '16px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            padding: 0,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            color: 'var(--text-secondary)',
+                                            opacity: 0.6,
+                                            transition: 'opacity 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                        onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
                                 </div>
+
 
                                 <button type="submit" className="btn-primary form-item-stagger" style={{ width: '100%', padding: '14px', marginTop: '8px' }}>Sign Up</button>
                             </form>
@@ -405,8 +455,31 @@ const AuthPage = () => {
                                     <Mail size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
                                 </div>
                                 <div className="form-item-stagger" style={{ width: '100%', position: 'relative' }}>
-                                    <input type="password" name="password" placeholder="Password" style={inputStyle} required onChange={handleChange} />
+                                    <input type={showPassword ? "text" : "password"} name="password" placeholder="Password" style={passwordInputStyle} required onChange={handleChange} />
                                     <Lock size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '16px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            background: 'none',
+                                            border: 'none',
+                                            padding: 0,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            color: 'var(--text-secondary)',
+                                            opacity: 0.6,
+                                            transition: 'opacity 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                        onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
                                 </div>
 
                                 <button type="submit" className="btn-primary form-item-stagger" style={{ width: '100%', padding: '14px', marginTop: '8px' }}>Sign In</button>
@@ -564,6 +637,11 @@ const inputStyle = {
     fontFamily: 'Manrope',
     boxShadow: 'var(--neo-inset)',
     transition: 'all 0.3s ease'
+};
+
+const passwordInputStyle = {
+    ...inputStyle,
+    paddingRight: '48px'
 };
 
 export default AuthPage;

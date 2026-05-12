@@ -202,7 +202,7 @@ const AIChatBar = forwardRef(({ editor, noteId }, ref) => {
             {isOpen && (
                 <div className="card-neumorphic-outset" style={{
                     width: '100%',
-                    height: '350px',
+                    height: isMobile ? '260px' : '350px',
                     borderRadius: '2rem',
                     background: 'var(--bg-dark)',
                     border: '1px solid rgba(255,255,255,0.02)',

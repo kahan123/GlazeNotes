@@ -35,11 +35,11 @@ const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDel
             transform: 'translateX(-50%)',
             width: isMobile ? 'calc(100% - 32px)' : `calc(100vw - ${sidebarCollapsed ? '80px' : '280px'} - 96px)`,
             maxWidth: '100%',
-            padding: '12px 24px',
+            padding: isMobile ? '12px 10px' : '12px 24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '12px',
+            gap: isMobile ? '4px' : '12px',
             zIndex: 1000,
             borderRadius: '1.5rem',
             background: 'var(--bg-dark)',
@@ -66,23 +66,23 @@ const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDel
                 >
                     <ChevronLeft size={18} />
                 </button>
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 700, fontFamily: 'Manrope', letterSpacing: '-0.01em' }}>
+                <span className="hide-on-mobile" style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 700, fontFamily: 'Manrope', letterSpacing: '-0.01em' }}>
                     GlazeNotes / Editor
                 </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '12px' }}>
                 <button
                     onClick={onSummarize}
                     disabled={isSummarizing || isSaving}
                     className="summarize-btn-neo"
                     style={{
-                        padding: '10px 18px',
+                        padding: isMobile ? '10px' : '10px 18px',
                         fontSize: '0.88rem',
                         fontWeight: '700',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
+                        gap: isMobile ? '0' : '8px',
                         whiteSpace: 'nowrap',
                         flexShrink: 0,
                         background: 'var(--bg-dark)',
@@ -94,9 +94,10 @@ const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDel
                         fontFamily: 'Manrope',
                         transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
+                    title={isSummarizing ? "Summarizing Note" : "Summarize Note with AI"}
                 >
                     {isSummarizing ? <Loader size={14} className="spin" /> : <Sparkles size={14} />}
-                    {isSummarizing ? 'Summarizing...' : 'Summarize'}
+                    <span className="hide-on-mobile">{isSummarizing ? 'Summarizing...' : 'Summarize'}</span>
                 </button>
 
                 <button
@@ -104,26 +105,27 @@ const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDel
                     disabled={isSaving}
                     className="btn-primary"
                     style={{
-                        padding: '10px 20px',
+                        padding: isMobile ? '10px' : '10px 20px',
                         fontSize: '0.88rem',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
+                        gap: isMobile ? '0' : '8px',
                         whiteSpace: 'nowrap',
                         flexShrink: 0,
-                        minWidth: '100px',
+                        minWidth: isMobile ? 'auto' : '100px',
                         justifyContent: 'center'
                     }}
+                    title={isSaving ? "Saving Note" : "Save Note"}
                 >
                     {isSaving ? <Loader size={14} className="spin" /> : <Save size={15} />}
-                    {isSaving ? 'Saving...' : 'Save'}
+                    <span className="hide-on-mobile">{isSaving ? 'Saving...' : 'Save'}</span>
                 </button>
 
                 <button
                     onClick={onShare}
                     className="share-btn-neo"
                     style={{
-                        padding: '10px 14px',
+                        padding: isMobile ? '10px' : '10px 14px',
                         fontSize: '0.88rem',
                         fontWeight: '700',
                         display: 'flex',
@@ -150,7 +152,7 @@ const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDel
                     onClick={onDelete}
                     className="delete-btn-neo"
                     style={{
-                        padding: '10px 14px',
+                        padding: isMobile ? '10px' : '10px 14px',
                         fontSize: '0.88rem',
                         fontWeight: '700',
                         display: 'flex',
@@ -179,7 +181,7 @@ const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDel
                         onClick={() => setIsFolderMenuOpen(!isFolderMenuOpen)}
                         className="folder-select-btn-neo"
                         style={{
-                            padding: '10px 14px',
+                            padding: isMobile ? '10px' : '10px 14px',
                             fontSize: '0.88rem',
                             fontWeight: '700',
                             display: 'flex',
@@ -202,7 +204,7 @@ const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDel
                         <span className="hide-on-mobile">
                             {folders?.find(f => f._id === selectedFolderId)?.name || 'No Workspace'}
                         </span>
-                        <ChevronDown size={14} style={{ marginLeft: '4px' }} />
+                        <ChevronDown size={14} style={{ marginLeft: '4px' }} className="hide-on-mobile" />
                     </button>
 
                     {isFolderMenuOpen && (
@@ -300,7 +302,7 @@ const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDel
                         onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
                         className="export-btn-neo"
                         style={{
-                            padding: '10px 14px',
+                            padding: isMobile ? '10px' : '10px 14px',
                             fontSize: '0.88rem',
                             fontWeight: '700',
                             display: 'flex',
@@ -321,7 +323,7 @@ const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDel
                     >
                         <Download size={14} />
                         <span className="hide-on-mobile">Export</span>
-                        <ChevronDown size={14} style={{ marginLeft: '4px' }} />
+                        <ChevronDown size={14} style={{ marginLeft: '4px' }} className="hide-on-mobile" />
                     </button>
 
                     {isExportMenuOpen && (
@@ -800,10 +802,10 @@ const NoteEditor = () => {
             {/* Note Editor Main Neumorphic Card container */}
             <div className="card-neumorphic-outset editor-reveal-element" style={{ 
                 width: '100%',
-                padding: '48px', 
+                padding: isMobile ? '24px 16px' : '48px', 
                 minHeight: '80vh', 
                 marginTop: '32px', 
-                borderRadius: '2.5rem',
+                borderRadius: isMobile ? '1.5rem' : '2.5rem',
                 background: 'var(--bg-dark)',
                 boxShadow: 'var(--neo-outset)',
                 border: '1px solid rgba(255,255,255,0.02)'
@@ -818,14 +820,14 @@ const NoteEditor = () => {
                         width: '100%',
                         background: 'transparent',
                         border: 'none',
-                        fontSize: '2.8rem',
+                        fontSize: isMobile ? '1.8rem' : '2.8rem',
                         fontWeight: '800',
                         color: 'var(--text-primary)',
                         marginBottom: '32px',
                         outline: 'none',
                         fontFamily: 'Manrope',
                         letterSpacing: '-0.02em',
-                        paddingLeft: isMobile ? '10px' : '54px',
+                        paddingLeft: isMobile ? '0' : '54px',
                         transition: 'padding-left 0.2s ease'
                     }}
                 />
@@ -838,22 +840,24 @@ const NoteEditor = () => {
             {/* Editor stats footer panel */}
             <div className="stats-panel editor-reveal-element" style={{ 
                 display: 'flex', 
+                flexDirection: isMobile ? 'column' : 'row',
                 justifyContent: 'space-between', 
-                alignItems: 'center', 
+                alignItems: isMobile ? 'flex-start' : 'center', 
                 marginTop: '24px', 
                 padding: '0 16px',
                 opacity: 0.6, 
                 fontSize: '0.88rem',
                 fontFamily: 'Manrope',
-                fontWeight: '600'
+                fontWeight: '600',
+                gap: isMobile ? '12px' : '0'
             }}>
 
-                <div style={{ display: 'flex', gap: '20px' }}>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                     <span><strong>{wordCount}</strong> words</span>
                     <span><strong>{charCount}</strong> characters</span>
                     <span><strong>{readingTime}</strong> min read</span>
                 </div>
-                <div>
+                <div style={{ marginTop: isMobile ? '4px' : '0' }}>
                     {lastSaved ? `Saved at ${lastSaved.toLocaleTimeString()}` : 'Unsaved changes'}
                 </div>
             </div>

@@ -33,7 +33,7 @@ const Navbar = () => {
             <button className="btn-primary hide-on-mobile" style={{ padding: '10px 28px', fontSize: '0.9rem' }} onClick={() => window.location.href = '/auth'}>Get Started</button>
 
             {/* Mobile Menu Toggle */}
-            <div className="show-on-mobile" style={{ display: 'none' }}>
+            <div className="show-on-mobile">
                 <button onClick={() => setIsMenuOpen(!isMenuOpen)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
                     {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>

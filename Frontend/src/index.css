@@ -254,13 +254,16 @@ input:-webkit-autofill:active {
 /* Responsive Design */
 @media (max-width: 768px) {
   h1 {
-    font-size: 2.2rem;
+    font-size: 2.0rem !important;
   }
   h2 {
-    font-size: 1.8rem !important;
+    font-size: 1.6rem !important;
+  }
+  h3 {
+    font-size: 1.35rem !important;
   }
   .container {
-    padding: 0 20px;
+    padding: 0 16px;
   }
   .flex-col-mobile {
     flex-direction: column !important;
@@ -269,6 +272,12 @@ input:-webkit-autofill:active {
   .w-full-mobile {
     width: 100% !important;
     max-width: 100% !important;
+  }
+  .hide-on-mobile {
+    display: none !important;
+  }
+  .show-on-mobile {
+    display: flex !important;
   }
 }
 

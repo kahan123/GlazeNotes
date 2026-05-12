@@ -375,7 +375,7 @@ const NotesHome = () => {
                         ) : (
                             /* Bento Note Cards Grid matching demo.html */
                             <>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '32px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '32px' }}>
                                     {filteredNotes.map((note) => (
                                         <div
                                             className="card-neumorphic-outset note-card-stagger"
@@ -629,7 +629,37 @@ const NotesHome = () => {
                     from { opacity: 0; transform: translateY(12px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
+
+                @media (max-width: 768px) {
+                    .mobile-fab {
+                        display: flex !important;
+                    }
+                }
             `}</style>
+
+            {/* Mobile Floating Action Button (FAB) */}
+            <button 
+                className="mobile-fab btn-primary" 
+                onClick={handleCreateNote}
+                style={{
+                    position: 'fixed',
+                    bottom: '32px',
+                    right: '24px',
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    padding: 0,
+                    display: 'none',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 99,
+                    boxShadow: '0 8px 32px rgba(76, 224, 146, 0.4)',
+                    border: 'none',
+                    cursor: 'pointer'
+                }}
+            >
+                <Plus size={28} />
+            </button>
 
             <ConfirmModal
                 isOpen={deleteModalOpen}

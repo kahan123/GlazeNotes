@@ -28,7 +28,7 @@ const About = () => {
                         display: 'inline-flex', 
                         flexDirection: 'column', 
                         alignItems: 'center', 
-                        minWidth: '360px', 
+                        minWidth: '280px', 
                         maxWidth: '100%',
                         background: 'var(--bg-dark)',
                         borderRadius: '2.5rem',

@@ -25,7 +25,7 @@ const Features = () => {
                 <h2 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '16px', color: 'var(--text-primary)', fontFamily: 'Manrope', letterSpacing: '-0.02em' }}>Designed for focus</h2>
                 <p style={{ maxWidth: '600px', margin: '0 auto', fontSize: '1.1rem', color: 'var(--text-secondary)', opacity: 0.8 }}>Everything you need to stay productive, without the clutter.</p>
             </div>
-            <div className="grid-1-col-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
+            <div className="grid-1-col-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px' }}>
                 {features.map((f, i) => (
                     <div 
                         className="card-neumorphic-outset feature-card" 

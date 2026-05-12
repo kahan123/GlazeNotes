@@ -1,7 +1,15 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 
 const Hero = () => {
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const titleRef = useRef(null);
     const descRef = useRef(null);
     const ctaRef = useRef(null);
@@ -116,8 +124,8 @@ const Hero = () => {
             }} />
 
             <div className="flex-col-mobile" style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-                <div className="w-full-mobile" style={{ flex: 1, paddingRight: '40px' }}>
-                    <h1 ref={titleRef} style={{ marginBottom: '24px', fontSize: '3.2rem', lineHeight: '1.15' }}>
+                <div className="w-full-mobile" style={{ flex: 1, paddingRight: isMobile ? '0' : '40px' }}>
+                    <h1 ref={titleRef} style={{ marginBottom: '24px', fontSize: isMobile ? '2.4rem' : '3.2rem', lineHeight: '1.15' }}>
                         Capture thoughts <br />
                         <span style={{ color: 'var(--accent-primary)', textShadow: '0 0 35px rgba(76, 224, 146, 0.25)' }}>before they fade.</span>
                     </h1>
