@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@blocknote/core": "^0.50.0",
+    "@blocknote/mantine": "^0.50.0",
+    "@blocknote/react": "^0.50.0",
     "@react-oauth/google": "^0.12.2",
     "@tiptap/extension-link": "^3.11.0",
     "@tiptap/extension-subscript": "^3.11.0",
@@ -19,6 +22,7 @@
     "@tiptap/react": "^3.11.0",
     "@tiptap/starter-kit": "^3.11.0",
     "axios": "^1.13.2",
+    "html2pdf.js": "^0.14.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.554.0",
     "react": "^19.2.0",

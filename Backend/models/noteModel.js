@@ -25,9 +25,24 @@ const noteSchema = mongoose.Schema({
     isPinned: {
         type: Boolean,
         default: false
+    },
+    embedding: {
+        type: [Number],
+        default: []
+    },
+    isPublic: {
+        type: Boolean,
+        default: false
+    },
+    folder: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Folder',
+        default: null
     }
 }, {
     timestamps: true
 });
+
+noteSchema.index({ title: 'text', content: 'text' });
 
 module.exports = mongoose.model('Note', noteSchema);
