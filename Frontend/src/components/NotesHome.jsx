@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useNotes } from '../context/NotesContext';
 import ConfirmModal from './ConfirmModal';
+import { gsap } from 'gsap';
+
 import { 
     Trash2, 
     Bookmark, 
@@ -35,12 +37,24 @@ const NotesHome = () => {
         fetchNotes,
         hasMore,
         loadMoreNotes,
-        folders
     } = useNotes();
+
+    const filteredNotes = getFilteredNotes();
+
 
     useEffect(() => {
         fetchNotes();
     }, [fetchNotes]);
+
+    useEffect(() => {
+        if (!loading && filteredNotes.length > 0) {
+            gsap.fromTo('.note-card-stagger', 
+                { opacity: 0, y: 30, scale: 0.95 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.05, ease: 'power3.out', overwrite: 'auto' }
+            );
+        }
+    }, [loading, filteredNotes.length]);
+
 
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [noteToDelete, setNoteToDelete] = useState(null);
@@ -81,7 +95,7 @@ const NotesHome = () => {
         }
     };
 
-    const filteredNotes = getFilteredNotes();
+
 
     // High Fidelity Skeleton Loader (Skeuomorphic)
     const SkeletonLoader = () => (
@@ -364,9 +378,10 @@ const NotesHome = () => {
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '32px' }}>
                                     {filteredNotes.map((note) => (
                                         <div
-                                            className="card-neumorphic-outset"
+                                            className="card-neumorphic-outset note-card-stagger"
                                             key={note._id}
                                             onClick={() => navigate(`/note/${note._id}`)}
+
                                             style={{
                                                 padding: '32px',
                                                 cursor: 'pointer',

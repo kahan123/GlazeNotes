@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import API from '../services/api';
 import { useUser } from '../context/UserContext';
 import { Mail, Lock, User } from 'lucide-react';
+import { gsap } from 'gsap';
 
 const AuthPage = () => {
     const [isSignUp, setIsSignUp] = useState(false);
     const navigate = useNavigate();
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const { login } = useUser();
+    const [authLoading, setAuthLoading] = useState(false);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -19,10 +21,57 @@ const AuthPage = () => {
     });
     const [error, setError] = useState('');
 
-    React.useEffect(() => {
+    // Refs for GSAP
+    const cardRef = useRef(null);
+    const bgBlob1Ref = useRef(null);
+    const bgBlob2Ref = useRef(null);
+
+    useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth <= 768);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Staggered entrance animation for form fields whenever mode toggles
+    useEffect(() => {
+        const items = document.querySelectorAll('.form-item-stagger');
+        if (items.length > 0) {
+            gsap.fromTo(items, 
+                { opacity: 0, y: 15, scale: 0.98 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.05, ease: 'power2.out', overwrite: 'auto' }
+            );
+        }
+    }, [isSignUp, isMobile]);
+
+    // Initial mount card entrance and infinite background animations
+    useEffect(() => {
+        // Ambient background floats
+        gsap.to(bgBlob1Ref.current, {
+            x: '60px',
+            y: '-40px',
+            duration: 9,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut'
+        });
+        gsap.to(bgBlob2Ref.current, {
+            x: '-60px',
+            y: '60px',
+            duration: 11,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut'
+        });
+
+        // Entrance scale-up of the main login card
+        gsap.fromTo(cardRef.current,
+            { opacity: 0, scale: 0.95, y: 40 },
+            { opacity: 1, scale: 1, y: 0, duration: 1.1, ease: 'power4.out' }
+        );
+
+        return () => {
+            gsap.killTweensOf([bgBlob1Ref.current, bgBlob2Ref.current, cardRef.current]);
+        };
     }, []);
 
     const handleChange = (e) => {
@@ -32,6 +81,7 @@ const AuthPage = () => {
     const handleAuth = async (e) => {
         e.preventDefault();
         setError('');
+        setAuthLoading(true);
         try {
             const endpoint = isSignUp ? '/auth/register' : '/auth/login';
             const { data } = await API.post(endpoint, formData);
@@ -40,11 +90,13 @@ const AuthPage = () => {
             navigate('/app');
         } catch (err) {
             setError(err.response?.data?.message || 'Something went wrong');
+            setAuthLoading(false);
         }
     };
 
     const googleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
+            setAuthLoading(true);
             try {
                 const { data } = await API.post('/auth/google', {
                     token: tokenResponse.access_token
@@ -54,9 +106,13 @@ const AuthPage = () => {
             } catch (err) {
                 console.error(err);
                 setError('Google Login Failed');
+                setAuthLoading(false);
             }
         },
-        onError: () => setError('Google Login Failed'),
+        onError: () => {
+            setError('Google Login Failed');
+            setAuthLoading(false);
+        },
     });
 
     return (
@@ -68,11 +124,45 @@ const AuthPage = () => {
             position: 'relative',
             zIndex: 10,
             padding: '24px',
-            background: 'var(--bg-dark)'
+            background: 'var(--bg-dark)',
+            overflow: 'hidden'
         }}>
+            {/* Background floating ambient blobs */}
+            <div ref={bgBlob1Ref} style={{
+                position: 'absolute',
+                top: '-10%',
+                left: '-10%',
+                width: '500px',
+                height: '500px',
+                background: 'rgba(76, 224, 146, 0.035)',
+                borderRadius: '50%',
+                filter: 'blur(120px)',
+                pointerEvents: 'none',
+                zIndex: -1
+            }} />
+            <div ref={bgBlob2Ref} style={{
+                position: 'absolute',
+                bottom: '-10%',
+                right: '-10%',
+                width: '600px',
+                height: '600px',
+                background: 'rgba(59, 130, 246, 0.025)',
+                borderRadius: '50%',
+                filter: 'blur(140px)',
+                pointerEvents: 'none',
+                zIndex: -1
+            }} />
 
+            {authLoading && (
+                <div className="loading-overlay">
+                    <div className="premium-spinner"></div>
+                    <div className="loading-text">
+                        {isSignUp ? "Creating your Second Brain..." : "Opening your Second Brain..."}
+                    </div>
+                </div>
+            )}
 
-            <div className="card-neumorphic-outset" style={{
+            <div ref={cardRef} className="card-neumorphic-outset" style={{
                 position: 'relative',
                 width: '900px',
                 maxWidth: '100%',
@@ -91,7 +181,7 @@ const AuthPage = () => {
                     <div style={{ flex: 1, padding: '40px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         <form onSubmit={handleAuth} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
                             {/* Inset Glowing 3D Logo Block */}
-                            <div className="logo-box-inset" style={{ 
+                            <div className="logo-box-inset form-item-stagger" style={{ 
                                 width: '56px', 
                                 height: '56px', 
                                 borderRadius: '16px', 
@@ -105,12 +195,12 @@ const AuthPage = () => {
                                 <img src="/logo.png" alt="GlazeNote Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
                             </div>
                             
-                            <h1 style={{ fontSize: '2.2rem', marginBottom: '8px', color: 'var(--text-primary)', fontWeight: '800', fontFamily: 'Manrope' }}>
+                            <h1 className="form-item-stagger" style={{ fontSize: '2.2rem', marginBottom: '8px', color: 'var(--text-primary)', fontWeight: '800', fontFamily: 'Manrope' }}>
                                 {isSignUp ? 'Create Account' : 'Welcome Back'}
                             </h1>
-                            {error && <p style={{ color: '#ef4444', fontSize: '0.9rem', fontWeight: '600' }}>{error}</p>}
+                            {error && <p className="form-item-stagger" style={{ color: '#ef4444', fontSize: '0.9rem', fontWeight: '600' }}>{error}</p>}
 
-                            <button type="button" onClick={() => googleLogin()} className="google-btn-neo" style={{
+                            <button type="button" onClick={() => googleLogin()} className="google-btn-neo form-item-stagger" style={{
                                 width: '100%',
                                 padding: '14px',
                                 display: 'flex',
@@ -136,28 +226,28 @@ const AuthPage = () => {
                                 Continue with Google
                             </button>
 
-                            <span style={{ fontSize: '0.88rem', opacity: 0.6, color: 'var(--text-secondary)', fontWeight: '600' }}>or use email address</span>
+                            <span className="form-item-stagger" style={{ fontSize: '0.88rem', opacity: 0.6, color: 'var(--text-secondary)', fontWeight: '600' }}>or use email address</span>
 
                             {isSignUp && (
-                                <div style={{ width: '100%', position: 'relative' }}>
+                                <div className="form-item-stagger" style={{ width: '100%', position: 'relative' }}>
                                     <input type="text" name="name" placeholder="Full Name" style={inputStyle} required onChange={handleChange} />
                                     <User size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
                                 </div>
                             )}
-                            <div style={{ width: '100%', position: 'relative' }}>
+                            <div className="form-item-stagger" style={{ width: '100%', position: 'relative' }}>
                                 <input type="email" name="email" placeholder="Email Address" style={inputStyle} required onChange={handleChange} />
                                 <Mail size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
                             </div>
-                            <div style={{ width: '100%', position: 'relative' }}>
+                            <div className="form-item-stagger" style={{ width: '100%', position: 'relative' }}>
                                 <input type="password" name="password" placeholder="Password" style={inputStyle} required onChange={handleChange} />
                                 <Lock size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
                             </div>
 
-                            <button type="submit" className="btn-primary" style={{ width: '100%', padding: '14px', marginTop: '12px' }}>
+                            <button type="submit" className="btn-primary form-item-stagger" style={{ width: '100%', padding: '14px', marginTop: '12px' }}>
                                 {isSignUp ? 'Create Premium Account' : 'Sign In Now'}
                             </button>
                             
-                            <p style={{ marginTop: '16px', fontSize: '0.92rem', color: 'var(--text-secondary)' }}>
+                            <p className="form-item-stagger" style={{ marginTop: '16px', fontSize: '0.92rem', color: 'var(--text-secondary)' }}>
                                 {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
                                 <a href="#" onClick={(e) => { e.preventDefault(); setIsSignUp(!isSignUp); setError(''); }} style={{ color: 'var(--accent-primary)', fontWeight: '800', textDecoration: 'none' }}>
                                     {isSignUp ? 'Sign In' : 'Sign Up'}
@@ -185,7 +275,7 @@ const AuthPage = () => {
                         }}>
                             <form onSubmit={handleAuth} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '22px' }}>
                                 {/* Inset Glowing Logo */}
-                                <div className="logo-box-inset" style={{ 
+                                <div className="logo-box-inset form-item-stagger" style={{ 
                                     width: '60px', 
                                     height: '60px', 
                                     borderRadius: '16px', 
@@ -199,10 +289,10 @@ const AuthPage = () => {
                                     <img src="/logo.png" alt="GlazeNote Logo" style={{ width: '34px', height: '34px', objectFit: 'contain' }} />
                                 </div>
 
-                                <h1 style={{ fontSize: '2.2rem', fontWeight: '800', color: 'var(--text-primary)', fontFamily: 'Manrope', letterSpacing: '-0.02em' }}>Create Account</h1>
-                                {error && <p style={{ color: '#ef4444', fontSize: '0.9rem', fontWeight: '600' }}>{error}</p>}
+                                <h1 className="form-item-stagger" style={{ fontSize: '2.2rem', fontWeight: '800', color: 'var(--text-primary)', fontFamily: 'Manrope', letterSpacing: '-0.02em' }}>Create Account</h1>
+                                {error && <p className="form-item-stagger" style={{ color: '#ef4444', fontSize: '0.9rem', fontWeight: '600' }}>{error}</p>}
 
-                                <button type="button" onClick={() => googleLogin()} className="google-btn-neo" style={{
+                                <button type="button" onClick={() => googleLogin()} className="google-btn-neo form-item-stagger" style={{
                                     width: '100%',
                                     padding: '14px',
                                     display: 'flex',
@@ -228,22 +318,22 @@ const AuthPage = () => {
                                     Sign up with Google
                                 </button>
 
-                                <span style={{ fontSize: '0.88rem', opacity: 0.6, color: 'var(--text-secondary)', fontWeight: '600' }}>or use email for registration</span>
+                                <span className="form-item-stagger" style={{ fontSize: '0.88rem', opacity: 0.6, color: 'var(--text-secondary)', fontWeight: '600' }}>or use email for registration</span>
 
-                                <div style={{ width: '100%', position: 'relative' }}>
+                                <div className="form-item-stagger" style={{ width: '100%', position: 'relative' }}>
                                     <input type="text" name="name" placeholder="Name" style={inputStyle} required onChange={handleChange} />
                                     <User size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
                                 </div>
-                                <div style={{ width: '100%', position: 'relative' }}>
+                                <div className="form-item-stagger" style={{ width: '100%', position: 'relative' }}>
                                     <input type="email" name="email" placeholder="Email" style={inputStyle} required onChange={handleChange} />
                                     <Mail size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
                                 </div>
-                                <div style={{ width: '100%', position: 'relative' }}>
+                                <div className="form-item-stagger" style={{ width: '100%', position: 'relative' }}>
                                     <input type="password" name="password" placeholder="Password" style={inputStyle} required onChange={handleChange} />
                                     <Lock size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
                                 </div>
 
-                                <button type="submit" className="btn-primary" style={{ width: '100%', padding: '14px', marginTop: '8px' }}>Sign Up</button>
+                                <button type="submit" className="btn-primary form-item-stagger" style={{ width: '100%', padding: '14px', marginTop: '8px' }}>Sign Up</button>
                             </form>
                         </div>
 
@@ -265,7 +355,7 @@ const AuthPage = () => {
                         }}>
                             <form onSubmit={handleAuth} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '22px' }}>
                                 {/* Inset Glowing Logo */}
-                                <div className="logo-box-inset" style={{ 
+                                <div className="logo-box-inset form-item-stagger" style={{ 
                                     width: '60px', 
                                     height: '60px', 
                                     borderRadius: '16px', 
@@ -279,10 +369,10 @@ const AuthPage = () => {
                                     <img src="/logo.png" alt="GlazeNote Logo" style={{ width: '34px', height: '34px', objectFit: 'contain' }} />
                                 </div>
 
-                                <h1 style={{ fontSize: '2.2rem', fontWeight: '800', color: 'var(--text-primary)', fontFamily: 'Manrope', letterSpacing: '-0.02em' }}>Sign In</h1>
-                                {error && <p style={{ color: '#ef4444', fontSize: '0.9rem', fontWeight: '600' }}>{error}</p>}
+                                <h1 className="form-item-stagger" style={{ fontSize: '2.2rem', fontWeight: '800', color: 'var(--text-primary)', fontFamily: 'Manrope', letterSpacing: '-0.02em' }}>Sign In</h1>
+                                {error && <p className="form-item-stagger" style={{ color: '#ef4444', fontSize: '0.9rem', fontWeight: '600' }}>{error}</p>}
 
-                                <button type="button" onClick={() => googleLogin()} className="google-btn-neo" style={{
+                                <button type="button" onClick={() => googleLogin()} className="google-btn-neo form-item-stagger" style={{
                                     width: '100%',
                                     padding: '14px',
                                     display: 'flex',
@@ -308,18 +398,18 @@ const AuthPage = () => {
                                     Sign in with Google
                                 </button>
 
-                                <span style={{ fontSize: '0.88rem', opacity: 0.6, color: 'var(--text-secondary)', fontWeight: '600' }}>or use email account</span>
+                                <span className="form-item-stagger" style={{ fontSize: '0.88rem', opacity: 0.6, color: 'var(--text-secondary)', fontWeight: '600' }}>or use email account</span>
 
-                                <div style={{ width: '100%', position: 'relative' }}>
+                                <div className="form-item-stagger" style={{ width: '100%', position: 'relative' }}>
                                     <input type="email" name="email" placeholder="Email" style={inputStyle} required onChange={handleChange} />
                                     <Mail size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
                                 </div>
-                                <div style={{ width: '100%', position: 'relative' }}>
+                                <div className="form-item-stagger" style={{ width: '100%', position: 'relative' }}>
                                     <input type="password" name="password" placeholder="Password" style={inputStyle} required onChange={handleChange} />
                                     <Lock size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', opacity: 0.6 }} />
                                 </div>
 
-                                <button type="submit" className="btn-primary" style={{ width: '100%', padding: '14px', marginTop: '8px' }}>Sign In</button>
+                                <button type="submit" className="btn-primary form-item-stagger" style={{ width: '100%', padding: '14px', marginTop: '8px' }}>Sign In</button>
                             </form>
                         </div>
 

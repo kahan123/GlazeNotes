@@ -1,7 +1,17 @@
 import React, { useEffect } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Info, CheckCircle2, AlertCircle } from 'lucide-react';
 
-const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText = "Delete", cancelText = "Cancel" }) => {
+const ConfirmModal = ({ 
+    isOpen, 
+    title, 
+    message, 
+    onConfirm, 
+    onCancel, 
+    confirmText = "OK", 
+    cancelText = "Cancel", 
+    isAlert = false,
+    type = "danger" // danger, warning, success, info
+}) => {
     // Disable background scrolling when modal is open
     useEffect(() => {
         if (isOpen) {
@@ -16,6 +26,39 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText
 
     if (!isOpen) return null;
 
+    // Type specific colors and icons
+    let iconColor = '#ef4444'; // default danger
+    let iconBg = 'rgba(239, 68, 68, 0.1)';
+    let IconComponent = AlertTriangle;
+    let buttonBg = '#ef4444';
+    let buttonHoverBg = '#dc2626';
+    let buttonShadow = '0 4px 15px rgba(239, 68, 68, 0.35)';
+
+    if (type === 'warning') {
+        iconColor = '#f59e0b';
+        iconBg = 'rgba(245, 158, 11, 0.1)';
+        IconComponent = AlertCircle;
+        buttonBg = '#f59e0b';
+        buttonHoverBg = '#d97706';
+        buttonShadow = '0 4px 15px rgba(245, 158, 11, 0.35)';
+    } else if (type === 'success') {
+        iconColor = 'var(--accent-primary)';
+        iconBg = 'rgba(76, 224, 146, 0.1)';
+        IconComponent = CheckCircle2;
+        buttonBg = 'var(--accent-primary)';
+        buttonHoverBg = 'var(--accent-secondary)';
+        buttonShadow = 'var(--glow)';
+    } else if (type === 'info') {
+        iconColor = '#3b82f6';
+        iconBg = 'rgba(59, 130, 246, 0.1)';
+        IconComponent = Info;
+        buttonBg = '#3b82f6';
+        buttonHoverBg = '#2563eb';
+        buttonShadow = '0 4px 15px rgba(59, 130, 246, 0.35)';
+    }
+
+    const defaultConfirmText = isAlert ? "OK" : (confirmText || "Confirm");
+
     return (
         <div style={{
             position: 'fixed',
@@ -23,9 +66,9 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText
             left: 0,
             width: '100vw',
             height: '100vh',
-            background: 'rgba(0, 0, 0, 0.45)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            background: 'rgba(18, 20, 20, 0.7)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -48,7 +91,7 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText
                 gap: '24px',
                 animation: 'scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
             }}>
-                {/* Warning Icon inside inset neumorphic trough */}
+                {/* Custom Type Icon inside inset neumorphic trough */}
                 <div style={{
                     width: '64px',
                     height: '64px',
@@ -58,9 +101,9 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#f87171',
+                    color: iconColor,
                 }}>
-                    <AlertTriangle size={24} />
+                    <IconComponent size={26} />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -92,45 +135,47 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText
                     width: '100%',
                     marginTop: '8px'
                 }}>
-                    <button
-                        onClick={onCancel}
-                        className="modal-cancel-btn"
-                        style={{
-                            flex: 1,
-                            padding: '12px 18px',
-                            background: 'var(--bg-dark)',
-                            border: '1px solid rgba(255, 255, 255, 0.01)',
-                            borderRadius: '14px',
-                            color: 'var(--text-secondary)',
-                            fontSize: '0.92rem',
-                            fontWeight: '700',
-                            fontFamily: 'Manrope',
-                            cursor: 'pointer',
-                            boxShadow: 'var(--neo-btn-outset)',
-                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }}
-                    >
-                        {cancelText}
-                    </button>
+                    {!isAlert && (
+                        <button
+                            onClick={onCancel}
+                            className="modal-cancel-btn"
+                            style={{
+                                flex: 1,
+                                padding: '12px 18px',
+                                background: 'var(--bg-dark)',
+                                border: '1px solid rgba(255, 255, 255, 0.01)',
+                                borderRadius: '14px',
+                                color: 'var(--text-secondary)',
+                                fontSize: '0.92rem',
+                                fontWeight: '700',
+                                fontFamily: 'Manrope',
+                                cursor: 'pointer',
+                                boxShadow: 'var(--neo-btn-outset)',
+                                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                            }}
+                        >
+                            {cancelText}
+                        </button>
+                    )}
                     <button
                         onClick={onConfirm}
                         className="modal-confirm-btn"
                         style={{
                             flex: 1,
                             padding: '12px 18px',
-                            background: '#ef4444',
+                            background: buttonBg,
                             border: 'none',
                             borderRadius: '14px',
-                            color: 'white',
+                            color: type === 'success' ? '#00391f' : 'white',
                             fontSize: '0.92rem',
-                            fontWeight: '700',
+                            fontWeight: '800',
                             fontFamily: 'Manrope',
                             cursor: 'pointer',
-                            boxShadow: '0 4px 15px rgba(239, 68, 68, 0.35)',
+                            boxShadow: buttonShadow,
                             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                     >
-                        {confirmText}
+                        {defaultConfirmText}
                     </button>
                 </div>
             </div>
@@ -156,9 +201,8 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText
                 }
 
                 .modal-confirm-btn:hover {
-                    background: #dc2626 !important;
+                    filter: brightness(1.1) !important;
                     transform: translateY(-1px);
-                    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.45) !important;
                 }
                 .modal-confirm-btn:active {
                     transform: translateY(1px);
@@ -169,3 +213,4 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText
 };
 
 export default ConfirmModal;
+

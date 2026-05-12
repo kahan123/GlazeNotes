@@ -10,8 +10,11 @@ import AIChatBar from './AIChatBar';
 import API from '../services/api';
 import ConfirmModal from './ConfirmModal';
 import { useNotes } from '../context/NotesContext';
+import { gsap } from 'gsap';
 
-const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDelete, onExport, onShare, isPublic, folders, selectedFolderId, onChangeFolder }) => {
+
+const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDelete, onExport, onShare, isPublic, folders, selectedFolderId, onChangeFolder, className }) => {
+
     const { sidebarCollapsed } = useNotes();
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
@@ -24,7 +27,8 @@ const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDel
     }, []);
 
     return (
-        <div className="card-neumorphic-outset" style={{
+        <div className={`card-neumorphic-outset ${className || ''}`} style={{
+
             position: 'fixed',
             top: '20px',
             left: isMobile ? '50%' : `calc(50vw + ${sidebarCollapsed ? '40px' : '140px'})`,
@@ -383,7 +387,8 @@ const MenuBar = ({ navigate, onSave, isSaving, onSummarize, isSummarizing, onDel
 const NoteEditor = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { updateNoteState, folders } = useNotes();
+    const { updateNoteState, folders, sidebarCollapsed } = useNotes();
+
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
     useEffect(() => {
@@ -400,6 +405,12 @@ const NoteEditor = () => {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [noteFolder, setNoteFolder] = useState(null);
     const [isPublic, setIsPublic] = useState(false);
+    const [customAlert, setCustomAlert] = useState({ isOpen: false, title: '', message: '', type: 'info' });
+
+    const showCustomAlert = (title, message, type = 'info') => {
+        setCustomAlert({ isOpen: true, title, message, type });
+    };
+
     
     // Editor stats
     const [wordCount, setWordCount] = useState(0);
@@ -511,6 +522,16 @@ const NoteEditor = () => {
         }, 2000);
     }, [updateStats, saveNote]);
 
+    useEffect(() => {
+        if (initialContentLoaded) {
+            gsap.fromTo('.editor-reveal-element', 
+                { opacity: 0, y: 15 },
+                { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: 'power2.out', overwrite: 'auto' }
+            );
+        }
+    }, [initialContentLoaded]);
+
+
     // Trigger summarization and load it inside the AI chat interface
     const handleSummarize = async () => {
         if (!editor || isSummarizing) return;
@@ -518,10 +539,11 @@ const NoteEditor = () => {
         try {
             const textContent = editor._tiptapEditor?.getText() || '';
             if (textContent.trim() === '') {
-                alert('Please write something in the note before requesting a summary.');
+                showCustomAlert('Empty Note', 'Please write something in the note before requesting a summary.', 'warning');
                 setIsSummarizing(false);
                 return;
             }
+
 
             // Open chat bar and trigger summarize endpoint
             if (chatBarRef.current) {
@@ -572,8 +594,9 @@ const NoteEditor = () => {
             updateNoteState(id, { folder: folderId || null });
         } catch (err) {
             console.error('Failed to change note folder:', err);
-            alert('Failed to update note workspace.');
+            showCustomAlert('Error', 'Failed to update note workspace.', 'danger');
         }
+
     };
 
     const handleConfirmDelete = async () => {
@@ -583,8 +606,9 @@ const NoteEditor = () => {
             navigate('/app');
         } catch (err) {
             console.error('Failed to delete note:', err);
-            alert('Failed to delete note. Please try again.');
+            showCustomAlert('Error', 'Failed to delete note. Please try again.', 'danger');
         } finally {
+
             setDeleteModalOpen(false);
         }
     };
@@ -637,8 +661,9 @@ const NoteEditor = () => {
             }
         } catch (err) {
             console.error(`Failed to export ${format}:`, err);
-            alert('Failed to export note.');
+            showCustomAlert('Error', 'Failed to export note.', 'danger');
         }
+
     };
 
     const downloadBlob = (content, mimeType, filename) => {
@@ -665,19 +690,98 @@ const NoteEditor = () => {
             if (newPublicState) {
                 const url = `${window.location.origin}/public/${id}`;
                 navigator.clipboard.writeText(url);
-                alert(`Public link copied to clipboard!\n${url}`);
+                showCustomAlert('Link Copied', `Public link copied to clipboard!\n${url}`, 'success');
             } else {
-                alert('Note is now private.');
+                showCustomAlert('Note Private', 'This note has been successfully set to private.', 'info');
             }
         } catch (err) {
             console.error('Failed to toggle share status:', err);
-            alert('Failed to update share status.');
+            showCustomAlert('Error', 'Failed to update share status.', 'danger');
         }
+
     };
 
+    if (!initialContentLoaded) {
+        return (
+            <div className="container" style={{ paddingTop: '120px', paddingBottom: '160px', width: '100%', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                {/* Fixed Mock MenuBar */}
+                <div className="card-neumorphic-outset" style={{
+                    position: 'fixed',
+                    top: '20px',
+                    left: isMobile ? '50%' : `calc(50vw + ${sidebarCollapsed ? '40px' : '140px'})`,
+                    transform: 'translateX(-50%)',
+                    width: isMobile ? 'calc(100% - 32px)' : `calc(100vw - ${sidebarCollapsed ? '80px' : '280px'} - 96px)`,
+                    maxWidth: '100%',
+                    padding: '12px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    zIndex: 1000,
+                    borderRadius: '1.5rem',
+                    background: 'var(--bg-dark)',
+                    boxShadow: 'var(--neo-btn-outset)',
+                    border: '1px solid rgba(255,255,255,0.02)',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <div className="skeleton-loader-pulse" style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-dark)', boxShadow: 'var(--neo-inset)' }} />
+                        <div className="skeleton-loader-pulse" style={{ width: '120px', height: '16px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)' }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        <div className="skeleton-loader-pulse" style={{ width: '90px', height: '36px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)' }} />
+                        <div className="skeleton-loader-pulse" style={{ width: '90px', height: '36px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)' }} />
+                    </div>
+                </div>
+
+                {/* Big Editor Card Skeleton */}
+                <div className="card-neumorphic-outset skeleton-loader-pulse" style={{
+                    width: '100%',
+                    padding: '48px',
+                    minHeight: '70vh',
+                    marginTop: '32px',
+                    borderRadius: '2.5rem',
+                    background: 'var(--bg-dark)',
+                    boxShadow: 'var(--neo-outset)',
+                    border: '1px solid rgba(255,255,255,0.02)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '24px'
+                }}>
+                    {/* Mock Title bar */}
+                    <div style={{ width: '60%', height: '40px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', marginLeft: isMobile ? '0' : '54px' }} />
+                    
+                    {/* Mock Paragraph lines */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '32px' }}>
+                        <div style={{ width: '100%', height: '18px', borderRadius: '6px', background: 'rgba(255,255,255,0.03)' }} />
+                        <div style={{ width: '95%', height: '18px', borderRadius: '6px', background: 'rgba(255,255,255,0.03)' }} />
+                        <div style={{ width: '98%', height: '18px', borderRadius: '6px', background: 'rgba(255,255,255,0.03)' }} />
+                        <div style={{ width: '40%', height: '18px', borderRadius: '6px', background: 'rgba(255,255,255,0.03)' }} />
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '32px' }}>
+                        <div style={{ width: '85%', height: '18px', borderRadius: '6px', background: 'rgba(255,255,255,0.03)' }} />
+                        <div style={{ width: '92%', height: '18px', borderRadius: '6px', background: 'rgba(255,255,255,0.03)' }} />
+                        <div style={{ width: '30%', height: '18px', borderRadius: '6px', background: 'rgba(255,255,255,0.03)' }} />
+                    </div>
+                </div>
+
+                <style>{`
+                    @keyframes skeleton-pulse {
+                        0%, 100% { opacity: 0.6; }
+                        50% { opacity: 0.35; }
+                    }
+                    .skeleton-loader-pulse {
+                        animation: skeleton-pulse 1.8s infinite ease-in-out;
+                    }
+                `}</style>
+            </div>
+        );
+    }
+
     return (
+
         <div className="container" style={{ paddingTop: '120px', paddingBottom: '160px', width: '100%', maxWidth: '100%' }}>
             <MenuBar 
+                className="editor-reveal-element"
                 navigate={navigate} 
                 onSave={() => saveNote(true)} 
                 isSaving={isSaving} 
@@ -692,8 +796,9 @@ const NoteEditor = () => {
                 onChangeFolder={handleChangeFolder}
             />
 
+
             {/* Note Editor Main Neumorphic Card container */}
-            <div className="card-neumorphic-outset" style={{ 
+            <div className="card-neumorphic-outset editor-reveal-element" style={{ 
                 width: '100%',
                 padding: '48px', 
                 minHeight: '80vh', 
@@ -703,6 +808,7 @@ const NoteEditor = () => {
                 boxShadow: 'var(--neo-outset)',
                 border: '1px solid rgba(255,255,255,0.02)'
             }}>
+
                 <input
                     type="text"
                     value={title}
@@ -730,7 +836,7 @@ const NoteEditor = () => {
             </div>
 
             {/* Editor stats footer panel */}
-            <div className="stats-panel" style={{ 
+            <div className="stats-panel editor-reveal-element" style={{ 
                 display: 'flex', 
                 justifyContent: 'space-between', 
                 alignItems: 'center', 
@@ -741,6 +847,7 @@ const NoteEditor = () => {
                 fontFamily: 'Manrope',
                 fontWeight: '600'
             }}>
+
                 <div style={{ display: 'flex', gap: '20px' }}>
                     <span><strong>{wordCount}</strong> words</span>
                     <span><strong>{charCount}</strong> characters</span>
@@ -760,6 +867,16 @@ const NoteEditor = () => {
                 onConfirm={handleConfirmDelete}
                 onCancel={() => setDeleteModalOpen(false)}
             />
+
+            <ConfirmModal
+                isOpen={customAlert.isOpen}
+                title={customAlert.title}
+                message={customAlert.message}
+                type={customAlert.type}
+                isAlert={true}
+                onConfirm={() => setCustomAlert({ ...customAlert, isOpen: false })}
+            />
+
 
             <style>{`
                 .back-btn-inset:hover {

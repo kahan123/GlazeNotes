@@ -24,6 +24,10 @@ export const NotesProvider = ({ children }) => {
     const [hasMore, setHasMore] = useState(false);
     const [page, setPage] = useState(1);
 
+    const [actionLoading, setActionLoading] = useState(false);
+    const [actionMessage, setActionMessage] = useState('');
+
+
     // Fetch notes from server
     const fetchNotes = useCallback(async (reset = false) => {
         if (!user) {
@@ -78,6 +82,8 @@ export const NotesProvider = ({ children }) => {
     }, [user]);
 
     const createFolderAction = useCallback(async (name, color) => {
+        setActionLoading(true);
+        setActionMessage('Creating folder...');
         try {
             const { data } = await API.post('/folders', { name, color });
             setFolders(prev => [data, ...prev]);
@@ -85,10 +91,15 @@ export const NotesProvider = ({ children }) => {
         } catch (err) {
             console.error('Failed to create folder:', err);
             throw err;
+        } finally {
+            setActionLoading(false);
+            setActionMessage('');
         }
     }, []);
 
     const deleteFolderAction = useCallback(async (id) => {
+        setActionLoading(true);
+        setActionMessage('Deleting folder and updating notes...');
         try {
             await API.delete(`/folders/${id}`);
             setFolders(prev => prev.filter(f => f._id !== id));
@@ -97,8 +108,12 @@ export const NotesProvider = ({ children }) => {
         } catch (err) {
             console.error('Failed to delete folder:', err);
             throw err;
+        } finally {
+            setActionLoading(false);
+            setActionMessage('');
         }
     }, []);
+
 
     useEffect(() => {
         if (!userLoading) {
@@ -137,6 +152,8 @@ export const NotesProvider = ({ children }) => {
 
     // Create a new note
     const createNote = useCallback(async (title = 'Untitled', content = '<p></p>') => {
+        setActionLoading(true);
+        setActionMessage('Creating your new note...');
         try {
             const { data } = await API.post('/notes', { title, content });
             setNotes(prev => [data, ...prev]);
@@ -144,19 +161,28 @@ export const NotesProvider = ({ children }) => {
         } catch (err) {
             console.error('Failed to create note:', err);
             throw err;
+        } finally {
+            setActionLoading(false);
+            setActionMessage('');
         }
     }, []);
 
     // Delete a note
     const deleteNote = useCallback(async (noteId) => {
+        setActionLoading(true);
+        setActionMessage('Deleting note...');
         try {
             await API.delete(`/notes/${noteId}`);
             setNotes(prev => prev.filter(n => n._id !== noteId));
         } catch (err) {
             console.error('Failed to delete note:', err);
             throw err;
+        } finally {
+            setActionLoading(false);
+            setActionMessage('');
         }
     }, []);
+
 
     // Toggle pin status of a note
     const togglePinNote = useCallback(async (noteId, currentStatus) => {
@@ -264,8 +290,11 @@ export const NotesProvider = ({ children }) => {
             selectedFolder,
             setSelectedFolder,
             createFolderAction,
-            deleteFolderAction
+            deleteFolderAction,
+            actionLoading,
+            actionMessage
         }}>
+
             {children}
         </NotesContext.Provider>
     );

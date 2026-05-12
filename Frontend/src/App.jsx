@@ -25,7 +25,7 @@ const LandingPage = () => (
 const AppContent = () => {
   const location = useLocation();
   const isAppRoute = location.pathname.startsWith('/app') || location.pathname.startsWith('/note');
-  const { sidebarCollapsed } = useNotes();
+  const { sidebarCollapsed, actionLoading, actionMessage } = useNotes();
 
   const containerStyle = isAppRoute ? {
     display: 'flex',
@@ -42,6 +42,13 @@ const AppContent = () => {
 
   return (
     <div className="app-container" style={containerStyle}>
+      {actionLoading && (
+        <div className="loading-overlay">
+          <div className="premium-spinner"></div>
+          <div className="loading-text">{actionMessage || 'Working...'}</div>
+        </div>
+      )}
+
 
 
       {/* Show Collapsible Left Sidebar for App Routes */}

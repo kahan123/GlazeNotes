@@ -1,6 +1,84 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 
 const Hero = () => {
+    const titleRef = useRef(null);
+    const descRef = useRef(null);
+    const ctaRef = useRef(null);
+    const cardRef = useRef(null);
+    const widgetRef = useRef(null);
+    const bgBlob1Ref = useRef(null);
+    const bgBlob2Ref = useRef(null);
+
+    useEffect(() => {
+        // Animate background glow blobs slowly moving
+        gsap.to(bgBlob1Ref.current, {
+            x: '50px',
+            y: '-30px',
+            duration: 8,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut'
+        });
+        gsap.to(bgBlob2Ref.current, {
+            x: '-40px',
+            y: '40px',
+            duration: 10,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut'
+        });
+
+        // Entrance animations timeline
+        const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+
+        tl.fromTo(titleRef.current, 
+            { opacity: 0, y: 60, skewY: 2 },
+            { opacity: 1, y: 0, skewY: 0, duration: 1.2, delay: 0.1 }
+        )
+        .fromTo(descRef.current,
+            { opacity: 0, y: 40 },
+            { opacity: 0.8, y: 0, duration: 1 },
+            '-=0.9'
+        )
+        .fromTo(ctaRef.current,
+            { opacity: 0, scale: 0.8, y: 20 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: 'back.out(1.7)' },
+            '-=0.8'
+        )
+        .fromTo(cardRef.current,
+            { opacity: 0, scale: 0.8, rotate: -15, y: 80 },
+            { opacity: 1, scale: 1, rotate: -2, y: 0, duration: 1.5, ease: 'elastic.out(1, 0.75)' },
+            '-=1.1'
+        )
+        .fromTo(widgetRef.current,
+            { opacity: 0, scale: 0.8, x: -60, y: 60 },
+            { 
+                opacity: 1, 
+                scale: 1, 
+                x: 0, 
+                y: 0, 
+                duration: 1.2, 
+                ease: 'power3.out',
+                onComplete: () => {
+                    // Start infinite seamless float
+                    gsap.to(widgetRef.current, {
+                        y: -12,
+                        duration: 3,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: 'sine.inOut'
+                    });
+                }
+            },
+            '-=1.2'
+        );
+
+        return () => {
+            gsap.killTweensOf([titleRef.current, descRef.current, ctaRef.current, cardRef.current, widgetRef.current, bgBlob1Ref.current, bgBlob2Ref.current]);
+        };
+    }, []);
+
     return (
         <section className="container mobile-padding-top" style={{
             minHeight: '100vh',
@@ -11,26 +89,51 @@ const Hero = () => {
             position: 'relative',
             zIndex: 1
         }}>
+            {/* Background floating accent blobs for ambient aesthetic */}
+            <div ref={bgBlob1Ref} style={{
+                position: 'absolute',
+                top: '20%',
+                left: '10%',
+                width: '300px',
+                height: '300px',
+                background: 'rgba(76, 224, 146, 0.03)',
+                borderRadius: '50%',
+                filter: 'blur(80px)',
+                pointerEvents: 'none',
+                zIndex: -1
+            }} />
+            <div ref={bgBlob2Ref} style={{
+                position: 'absolute',
+                bottom: '20%',
+                right: '10%',
+                width: '400px',
+                height: '400px',
+                background: 'rgba(59, 130, 246, 0.02)',
+                borderRadius: '50%',
+                filter: 'blur(100px)',
+                pointerEvents: 'none',
+                zIndex: -1
+            }} />
+
             <div className="flex-col-mobile" style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
                 <div className="w-full-mobile" style={{ flex: 1, paddingRight: '40px' }}>
-                    <h1 style={{ marginBottom: '24px', fontSize: '3.2rem', lineHeight: '1.15' }}>
+                    <h1 ref={titleRef} style={{ marginBottom: '24px', fontSize: '3.2rem', lineHeight: '1.15' }}>
                         Capture thoughts <br />
                         <span style={{ color: 'var(--accent-primary)', textShadow: '0 0 35px rgba(76, 224, 146, 0.25)' }}>before they fade.</span>
                     </h1>
-                    <p style={{ fontSize: '1.2rem', marginBottom: '40px', maxWidth: '500px', color: 'var(--text-secondary)' }}>
+                    <p ref={descRef} style={{ fontSize: '1.2rem', marginBottom: '40px', maxWidth: '500px', color: 'var(--text-secondary)' }}>
                         GlazeNotes: The high-contrast, AI-assisted notes app designed for absolute clarity.
                         Organize your second brain with skeuomorphic precision.
                     </p>
-                    <div style={{ display: 'flex', gap: '20px' }}>
+                    <div ref={ctaRef} style={{ display: 'flex', gap: '20px' }}>
                         <button className="btn-primary" onClick={() => window.location.href = '/auth'}>Start Writing Free</button>
                     </div>
                 </div>
 
                 <div className="w-full-mobile" style={{ flex: 1, position: 'relative', display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
                     {/* Mock Neumorphic Note Card */}
-                    <div className="card-neumorphic-outset" style={{ 
+                    <div ref={cardRef} className="card-neumorphic-outset" style={{ 
                         padding: '40px', 
-                        transform: 'rotate(-2deg)', 
                         width: '100%', 
                         maxWidth: '450px', 
                         minHeight: '350px',
@@ -59,7 +162,7 @@ const Hero = () => {
                     </div>
 
                     {/* Mock Floating Neumorphic Widget */}
-                    <div className="card-neumorphic-outset" style={{
+                    <div ref={widgetRef} className="card-neumorphic-outset" style={{
                         position: 'absolute',
                         bottom: '-30px',
                         left: '-20px',
@@ -68,8 +171,7 @@ const Hero = () => {
                         background: 'var(--bg-dark)',
                         borderRadius: '1.5rem',
                         boxShadow: '8px 8px 32px var(--shadow-dark)',
-                        border: '1px solid rgba(255,255,255,0.02)',
-                        animation: 'floating 4s ease-in-out infinite'
+                        border: '1px solid rgba(255,255,255,0.02)'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                             {/* Inset Circular dot wrapper */}
@@ -84,16 +186,9 @@ const Hero = () => {
                     </div>
                 </div>
             </div>
-
-            <style>{`
-                @keyframes floating {
-                    0% { transform: translateY(0px); }
-                    50% { transform: translateY(-10px); }
-                    100% { transform: translateY(0px); }
-                }
-            `}</style>
         </section>
     );
 };
 
 export default Hero;
+

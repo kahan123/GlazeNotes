@@ -3,6 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useNotes } from '../context/NotesContext';
 import AvatarSelector from './AvatarSelector';
+import ConfirmModal from './ConfirmModal';
+import { gsap } from 'gsap';
+
+
 import { 
     Plus, 
     FileText, 
@@ -50,6 +54,22 @@ const Sidebar = () => {
     const [isDarkMode, setIsDarkMode] = useState(true);
     const [isCreatingFolder, setIsCreatingFolder] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
+    const [deleteFolderModalOpen, setDeleteFolderModalOpen] = useState(false);
+    const [folderToDelete, setFolderToDelete] = useState(null);
+
+    const handleConfirmDeleteFolder = async () => {
+        if (!folderToDelete) return;
+        try {
+            await deleteFolderAction(folderToDelete._id);
+            if (selectedFolder === folderToDelete._id) setSelectedFolder(null);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setDeleteFolderModalOpen(false);
+            setFolderToDelete(null);
+        }
+    };
+
 
     const handleCreateFolder = async (e) => {
         e.preventDefault();
@@ -74,6 +94,18 @@ const Sidebar = () => {
             document.documentElement.classList.remove('light-theme');
         }
     }, []);
+
+    useEffect(() => {
+        // Smooth staggered reveal of navigation buttons
+        const navElements = document.querySelectorAll('nav > button, nav > div');
+        if (navElements.length > 0) {
+            gsap.fromTo(navElements,
+                { opacity: 0, x: -15 },
+                { opacity: 1, x: 0, duration: 0.5, stagger: 0.04, ease: 'power2.out', overwrite: 'auto' }
+            );
+        }
+    }, [sidebarCollapsed]);
+
 
     const toggleTheme = () => {
         if (isDarkMode) {
@@ -577,11 +609,10 @@ const Sidebar = () => {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    if (confirm(`Delete folder "${folder.name}"? Notes in this folder will not be deleted.`)) {
-                                                        deleteFolderAction(folder._id);
-                                                        if (selectedFolder === folder._id) setSelectedFolder(null);
-                                                    }
+                                                    setFolderToDelete(folder);
+                                                    setDeleteFolderModalOpen(true);
                                                 }}
+
                                                 style={{
                                                     position: 'absolute',
                                                     right: '4px',
@@ -921,7 +952,22 @@ const Sidebar = () => {
                     }
                 }
             `}</style>
+
+            <ConfirmModal 
+                isOpen={deleteFolderModalOpen}
+                title="Delete Workspace"
+                message={`Are you sure you want to delete "${folderToDelete?.name}"? All notes in this workspace will be unassigned but won't be deleted.`}
+                onConfirm={handleConfirmDeleteFolder}
+                onCancel={() => {
+                    setDeleteFolderModalOpen(false);
+                    setFolderToDelete(null);
+                }}
+                confirmText="Delete"
+                cancelText="Cancel"
+                type="danger"
+            />
         </>
+
     );
 };
 

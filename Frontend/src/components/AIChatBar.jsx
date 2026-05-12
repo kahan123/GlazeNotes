@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } f
 import { Sparkles, Send, X, ChevronDown, Trash2 } from 'lucide-react';
 import API from '../services/api';
 import { useNotes } from '../context/NotesContext';
+import { gsap } from 'gsap';
+
 
 const htmlToReact = (html) => {
     return <span dangerouslySetInnerHTML={{ __html: html }} />;
@@ -122,6 +124,20 @@ const AIChatBar = forwardRef(({ editor, noteId }, ref) => {
         }
     }, [messages, isOpen]);
 
+    useEffect(() => {
+        if (messages.length > 0) {
+            const messageBubbles = document.querySelectorAll('.ai-message-bubble-gsap');
+            if (messageBubbles.length > 0) {
+                const lastBubble = messageBubbles[messageBubbles.length - 1];
+                gsap.fromTo(lastBubble, 
+                    { opacity: 0, scale: 0.9, y: 15 },
+                    { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: 'back.out(1.25)', overwrite: 'auto' }
+                );
+            }
+        }
+    }, [messages.length]);
+
+
     const handleSend = async () => {
         if (!input.trim()) return;
         const userMsg = input;
@@ -231,7 +247,7 @@ const AIChatBar = forwardRef(({ editor, noteId }, ref) => {
                     {/* Messages Body */}
                     <div style={{ flex: 1, padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         {messages.map((msg, idx) => (
-                            <div key={idx} style={{
+                            <div key={idx} className="ai-message-bubble-gsap" style={{
                                 alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
                                 background: msg.role === 'user' ? 'var(--accent-primary)' : 'var(--bg-dark)',
                                 padding: '14px 18px',
@@ -243,6 +259,7 @@ const AIChatBar = forwardRef(({ editor, noteId }, ref) => {
                                 boxShadow: msg.role === 'user' ? '0 4px 15px rgba(76,224,146,0.3)' : 'inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light)',
                                 border: msg.role === 'user' ? 'none' : '1px solid rgba(255,255,255,0.01)'
                             }}>
+
                                 {msg.isTemp ? (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <div className="dot-pulse" style={{ display: 'flex', gap: '4px' }}>
